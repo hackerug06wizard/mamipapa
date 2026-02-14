@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products - Bespoke Baby Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', 'YOUR_PIXEL_ID_HERE');
+        fbq('track', 'PageView');
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand">
+                <h1>Bespoke Baby Store</h1>
+            </a>
+            
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html" class="active">Products</a></li>
+                <li><a href="categories.html">Categories</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+
+            <div class="nav-cart" id="navCart">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>All Products</h1>
+            <p>Browse our complete collection of premium baby essentials</p>
+        </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="featured-products">
+        <div class="container">
+            <div class="products-grid">
+                <div class="product-card" data-product="Premium Baby Bottle" data-price="25000">
+                    <div class="product-image">
+                        <img src="https://www.chiccousa.com/dw/image/v2/BLNH_PRD/on/demandware.static/-/Sites-chicco_catalog/default/dw39f8a5f8/images/products/feeding/duo-bottle/chicco-duo-bottle-5oz-single.jpg?sw=660" alt="Premium Baby Bottle">
+                    </div>
+                    <div class="product-info">
+                        <h3>Premium Baby Bottle</h3>
+                        <p class="product-description">Anti-colic, BPA-free, 250ml</p>
+                        <div class="product-footer">
+                            <span class="price">UGX 25,000</span>
+                            <button class="btn-add-cart" onclick="addToCart('Premium Baby Bottle', 25000)">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product="Baby Pacifier Set" data-price="15000">
+                    <div class="product-image">
+                        <img src="https://moonkieshop.com/cdn/shop/files/baby_pacifier_set_pinkpalemauve.jpg?v=1770620806&width=3264" alt="Baby Pacifier Set">
+                    </div>
+                    <div class="product-info">
+                        <h3>Baby Pacifier Set</h3>
+                        <p class="product-description">Orthodontic, 0-6 months, 2 pack</p>
+                        <div class="product-footer">
+                            <span class="price">UGX 15,000</span>
+                            <button class="btn-add-cart" onclick="addToCart('Baby Pacifier Set', 15000)">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product="Digital Bottle Warmer" data-price="45000">
+                    <div class="product-image">
+                        <img src="https://www.chiccousa.com/on/demandware.static/-/Sites-chicco_catalog/default/dw2d47a2ec/images/products/feeding/sterilizers/chicco-digital-bottle-warmer-sterilizer.jpg" alt="Bottle Warmer">
+                    </div>
+                    <div class="product-info">
+                        <h3>Digital Bottle Warmer</h3>
+                        <p class="product-description">Fast warming, sterilizer function</p>
+                        <div class="product-footer">
+                            <span class="price">UGX 45,000</span>
+                            <button class="btn-add-cart" onclick="addToCart('Digital Bottle Warmer', 45000)">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product="Organic Cotton Onesie" data-price="18000">
+                    <div class="product-image">
+                        <img src="https://www.bellacanvas.com/bella/product/hires/100B00.jpg" alt="Organic Cotton Onesie">
+                    </div>
+                    <div class="product-info">
+                        <h3>Organic Cotton Onesie</h3>
+                        <p class="product-description">Soft, breathable, 0-3 months</p>
+                        <div class="product-footer">
+                            <span class="price">UGX 18,000</span>
+                            <button class="btn-add-cart" onclick="addToCart('Organic Cotton Onesie', 18000)">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product="Baby Bibs Set" data-price="12000">
+                    <div class="product-image">
+                        <img src="https://media.istockphoto.com/id/1307563401/photo/baby-bottle-teething-ring-napkin-and-pacifier-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=zf7ILzOn2hnHJ-4KJBx37W_ssmrN8lLggQ9JvYZmHWg=" alt="Baby Bibs Set">
+                    </div>
+                    <div class="product-info">
+                        <h3>Baby Bibs Set</h3>
+                        <p class="product-description">Waterproof, easy clean, 5 pack</p>
+                        <div class="product-footer">
+                            <span class="price">UGX 12,000</span>
+                            <button class="btn-add-cart" onclick="addToCart('Baby Bibs Set', 12000)">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product="Baby Blanket" data-price="35000">
+                    <div class="product-image">
+                        <img src="https://freerangestock.com/sample/167575/baby-clothing-and-accessories-flat-lay.jpg" alt="Baby Blanket">
+                    </div>
+                    <div class="product-info">
+                        <h3>Soft Baby Blanket</h3>
+                        <p class="product-description">Organic cotton, 100x80cm</p>
+                        <div class="product-footer">
+                            <span class="price">UGX 35,000</span>
+                            <button class="btn-add-cart" onclick="addToCart('Soft Baby Blanket', 35000)">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product="Breast Pump" data-price="85000">
+                    <div class="product-image">
+                        <img src="https://www.heromea.com/baby/sites/mea.baby/files/styles/600x412_product_detail/public/NS_1_400_Update_8_2021-3.png?itok=xG9qh179" alt="Breast Pump">
+                    </div>
+                    <div class="product-info">
+                        <h3>Electric Breast Pump</h3>
+                        <p class="product-description">Double pump, rechargeable</p>
+                        <div class="product-footer">
+                            <span class="price">UGX 85,000</span>
+                            <button class="btn-add-cart" onclick="addToCart('Electric Breast Pump', 85000)">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product="Baby Monitor" data-price="120000">
+                    <div class="product-image">
+                        <img src="https://www.multivu.com/players/English/8377251-new-johnsons-improved-baby-products/image/JohnsonHero_1533082650034-null-HR.jpg" alt="Baby Monitor">
+                    </div>
+                    <div class="product-info">
+                        <h3>Video Baby Monitor</h3>
+                        <p class="product-description">Night vision, two-way audio</p>
+                        <div class="product-footer">
+                            <span class="price">UGX 120,000</span>
+                            <button class="btn-add-cart" onclick="addToCart('Video Baby Monitor', 120000)">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>Bespoke Baby Store</h3>
+                    <p>Premium baby essentials for your little ones.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="categories.html">Categories</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Email: hello@bespokebabystore.com</p>
+                    <p>Phone: +256 700 123 456</p>
+                    <p>Kampala, Uganda</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Bespoke Baby Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCart()">&times;</span>
+            <h2>Shopping Cart</h2>
+            <div id="cartItems"></div>
+            <div class="cart-total">
+                <strong>Total: UGX <span id="cartTotal">0</span></strong>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="checkout()">Checkout</button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
