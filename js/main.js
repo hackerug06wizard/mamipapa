@@ -1,22 +1,29 @@
 // Cart State
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-// WhatsApp Number - REPLACE WITH YOUR NUMBER
-const WHATSAPP_NUMBER = '256700123456';
+// YOUR WhatsApp Number
+const WHATSAPP_NUMBER = '256783468608';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     updateCartUI();
-    console.log('Bespoke Baby Store Loaded');
+    console.log('Bespoke Baby Store Loaded - Pixel ID: 2621239424886813');
 });
 
-// Toggle Mobile Navigation
+// Toggle Mobile Navigation - FIXED
 function toggleNav() {
     const navLinks = document.getElementById('navLinks');
     const navToggle = document.getElementById('navToggle');
     
     navLinks.classList.toggle('active');
     navToggle.classList.toggle('active');
+    
+    // Prevent body scroll when menu is open
+    if (navLinks.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
 }
 
 // Open Cart
@@ -25,6 +32,14 @@ function openCart() {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     updateCartUI();
+    
+    // Track cart view
+    if (typeof fbq !== 'undefined') {
+        fbq('trackCustom', 'ViewCart', {
+            item_count: getItemCount(),
+            cart_value: getTotal()
+        });
+    }
 }
 
 // Close Cart
@@ -61,10 +76,12 @@ function addToCart(id, name, price, image) {
     updateCartUI();
     showNotification(name + ' added to cart!');
     
-    // Meta Pixel
+    // Meta Pixel - AddToCart
     if (typeof fbq !== 'undefined') {
         fbq('track', 'AddToCart', {
+            content_ids: [id.toString()],
             content_name: name,
+            content_type: 'product',
             value: price,
             currency: 'UGX'
         });
@@ -150,13 +167,37 @@ function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-// WhatsApp Checkout
+// WhatsApp Checkout - WITH CUSTOM CONVERSION FOR FACEBOOK ADS
 function checkoutWhatsApp() {
     if (cart.length === 0) {
         showNotification('Cart is empty!');
         return;
     }
     
+    // ============================================
+    // FACEBOOK CUSTOM CONVERSION - CHECKOUT INITIATED
+    // This is what you'll be charged for in Facebook Ads
+    // ============================================
+    if (typeof fbq !== 'undefined') {
+        // Standard InitiateCheckout event
+        fbq('track', 'InitiateCheckout', {
+            content_ids: cart.map(item => item.id.toString()),
+            content_type: 'product',
+            value: getTotal(),
+            currency: 'UGX',
+            num_items: getItemCount()
+        });
+        
+        // Custom conversion for WhatsApp specifically
+        fbq('trackCustom', 'WhatsAppCheckoutClick', {
+            cart_value: getTotal(),
+            item_count: getItemCount(),
+            products: cart.map(item => item.name).join(', '),
+            whatsapp_number: WHATSAPP_NUMBER
+        });
+    }
+    
+    // Build WhatsApp message
     let message = '🛒 *Bespoke Baby Store Order*\n\n';
     message += '*Items:*\n';
     
@@ -169,21 +210,24 @@ function checkoutWhatsApp() {
     message += `*Total: UGX ${getTotal().toLocaleString()}*\n\n`;
     message += 'Please confirm my order. Thank you!';
     
+    // Open WhatsApp
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
     
-    // Meta Pixel
+    showNotification('Opening WhatsApp...');
+}
+
+// Track WhatsApp click on contact page
+function trackWhatsAppClick() {
     if (typeof fbq !== 'undefined') {
-        fbq('track', 'InitiateCheckout', {
-            value: getTotal(),
-            currency: 'UGX'
+        fbq('trackCustom', 'ContactWhatsAppClick', {
+            location: 'contact_page'
         });
     }
 }
 
 // Notification
 function showNotification(message) {
-    // Remove existing
     const existing = document.querySelector('.notification');
     if (existing) existing.remove();
     
