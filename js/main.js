@@ -2,7 +2,7 @@
 let cart = [];
 
 // WhatsApp Business Number - Replace with your number
-const WHATSAPP_NUMBER = '256700123456'; // Format: country code + number without +
+const WHATSAPP_NUMBER = '256783468608'; // Format: country code + number without +
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
