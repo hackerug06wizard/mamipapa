@@ -1,6 +1,8 @@
 // Shopping Cart State
 let cart = [];
-let cartTotal = 0;
+
+// WhatsApp Business Number - Replace with your number
+const WHATSAPP_NUMBER = '256700123456'; // Format: country code + number without +
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -16,13 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Bespoke Baby Store loaded');
 });
 
-// Mobile Navigation Setup
+// Mobile Navigation Setup - FIXED
 function setupMobileNav() {
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
     
     if (navToggle && navLinks) {
-        navToggle.addEventListener('click', function() {
+        navToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
             this.classList.toggle('active');
             navLinks.classList.toggle('active');
         });
@@ -35,27 +38,28 @@ function setupMobileNav() {
                 navLinks.classList.remove('active');
             });
         });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                navToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
+        });
     }
 }
 
 // Cart Modal Setup
 function setupCartModal() {
     const navCart = document.getElementById('navCart');
-    const cartModal = document.getElementById('cartModal');
     
-    if (navCart && cartModal) {
+    if (navCart) {
         navCart.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             openCart();
         });
     }
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        if (event.target === cartModal) {
-            closeCart();
-        }
-    });
 }
 
 // Meta Pixel Tracking Functions
@@ -79,14 +83,25 @@ function formatUGX(amount) {
 }
 
 // Add to Cart Function
-function addToCart(productName, price) {
-    // Add to cart array
-    cart.push({ 
-        id: Date.now(), // unique ID for each item
-        name: productName, 
-        price: price 
-    });
-    cartTotal += price;
+function addToCart(id, name, price, image) {
+    // Check if item already exists in cart
+    const existingItem = cart.find(item => item.id === id);
+    
+    if (existingItem) {
+        // Increase quantity if already in cart
+        existingItem.quantity += 1;
+        existingItem.subtotal = existingItem.quantity * existingItem.price;
+    } else {
+        // Add new item
+        cart.push({
+            id: id,
+            name: name,
+            price: price,
+            image: image,
+            quantity: 1,
+            subtotal: price
+        });
+    }
     
     // Save to localStorage
     saveCart();
@@ -96,40 +111,80 @@ function addToCart(productName, price) {
     
     // Track with Meta Pixel
     trackStandardEvent('AddToCart', {
-        content_name: productName,
+        content_ids: [id.toString()],
+        content_name: name,
         value: price,
         currency: 'UGX',
-        content_type: 'product'
+        content_type: 'product',
+        quantity: 1
     });
     
     trackCustomEvent('AddToCartCustom', {
-        product_name: productName,
+        product_id: id,
+        product_name: name,
         product_price: price,
-        cart_total: cartTotal,
-        item_count: cart.length
+        cart_item_count: getTotalItems(),
+        cart_total: getCartTotal()
     });
     
-    showNotification(`${productName} added to cart!`);
+    showNotification(`${name} added to cart!`);
+}
+
+// Update Quantity
+function updateQuantity(id, change) {
+    const item = cart.find(item => item.id === id);
+    if (!item) return;
+    
+    const newQuantity = item.quantity + change;
+    
+    if (newQuantity < 1) {
+        // Remove item if quantity goes below 1
+        removeFromCart(id);
+        return;
+    }
+    
+    item.quantity = newQuantity;
+    item.subtotal = item.quantity * item.price;
+    
+    saveCart();
+    updateCartUI();
+    
+    trackCustomEvent('CartQuantityChanged', {
+        product_id: id,
+        product_name: item.name,
+        new_quantity: newQuantity,
+        cart_total: getCartTotal()
+    });
 }
 
 // Remove from Cart
-function removeFromCart(itemId) {
-    const itemIndex = cart.findIndex(item => item.id === itemId);
+function removeFromCart(id) {
+    const itemIndex = cart.findIndex(item => item.id === id);
     if (itemIndex > -1) {
         const item = cart[itemIndex];
-        cartTotal -= item.price;
         cart.splice(itemIndex, 1);
         
         saveCart();
         updateCartUI();
         
         trackCustomEvent('RemoveFromCart', {
+            product_id: id,
             product_name: item.name,
-            cart_total: cartTotal
+            cart_total: getCartTotal()
         });
         
         showNotification('Item removed from cart');
     }
+}
+
+// Get total items in cart
+function getTotalItems() {
+    return cart.reduce((total, item) => total + item.quantity, 0);
+}
+
+// Get cart total
+function getCartTotal() {
+    return cart.reduce((total, item) => total + item.subtotal, 0);
 }
 
 // Update Cart UI
@@ -138,21 +193,42 @@ function updateCartUI() {
     const cartItems = document.getElementById('cartItems');
     const cartTotalEl = document.getElementById('cartTotal');
     
+    const totalItems = getTotalItems();
+    const total = getCartTotal();
+    
     // Update badge
     if (cartCount) {
-        cartCount.textContent = cart.length;
+        cartCount.textContent = totalItems;
+        // Add bounce animation
+        cartCount.style.transform = 'scale(1.3)';
+        setTimeout(() => {
+            cartCount.style.transform = 'scale(1)';
+        }, 200);
     }
     
     // Update modal content
     if (cartItems) {
         if (cart.length === 0) {
-            cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
+            cartItems.innerHTML = `
+                <div class="empty-cart">
+                    <div class="empty-cart-icon">🛒</div>
+                    <p>Your cart is empty</p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">Add some products!</p>
+                </div>
+            `;
         } else {
             cartItems.innerHTML = cart.map((item) => `
                 <div class="cart-item">
-                    <div class="cart-item-info">
+                    <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+                    <div class="cart-item-details">
                         <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-price">${formatUGX(item.price)}</div>
+                        <div class="cart-item-price">${formatUGX(item.price)} each</div>
+                        <div class="quantity-control">
+                            <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+                            <span class="qty-value">${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                        </div>
+                        <div class="cart-item-subtotal">Subtotal: ${formatUGX(item.subtotal)}</div>
                     </div>
                     <button class="cart-item-remove" onclick="removeFromCart(${item.id})">Remove</button>
                 </div>
@@ -162,7 +238,7 @@ function updateCartUI() {
     
     // Update total
     if (cartTotalEl) {
-        cartTotalEl.textContent = cartTotal.toLocaleString('en-UG');
+        cartTotalEl.textContent = formatUGX(total);
     }
 }
 
@@ -171,11 +247,12 @@ function openCart() {
     const modal = document.getElementById('cartModal');
     if (modal) {
         modal.style.display = 'block';
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        document.body.style.overflow = 'hidden';
         
         trackCustomEvent('CartViewed', {
-            item_count: cart.length,
-            cart_value: cartTotal
+            item_count: getTotalItems(),
+            cart_value: getCartTotal(),
+            unique_items: cart.length
         });
     }
 }
@@ -185,74 +262,71 @@ function closeCart() {
     const modal = document.getElementById('cartModal');
     if (modal) {
         modal.style.display = 'none';
-        document.body.style.overflow = ''; // Restore scrolling
+        document.body.style.overflow = '';
     }
 }
 
-// Checkout Function
-function checkout() {
+// WhatsApp Checkout
+function checkoutWhatsApp() {
     if (cart.length === 0) {
         showNotification('Your cart is empty!');
         return;
     }
     
-    // Track purchase initiation
+    // Track checkout initiation
     trackStandardEvent('InitiateCheckout', {
-        value: cartTotal,
+        value: getCartTotal(),
         currency: 'UGX',
-        num_items: cart.length
+        num_items: getTotalItems()
     });
     
-    trackCustomEvent('CheckoutStarted', {
-        cart_total: cartTotal,
-        item_count: cart.length,
-        items: cart.map(item => item.name).join(', ')
+    // Build WhatsApp message
+    let message = '🛒 *New Order from Bespoke Baby Store*\n\n';
+    message += '*Order Details:*\n';
+    message += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    
+    cart.forEach((item, index) => {
+        message += `*${index + 1}. ${item.name}*\n`;
+        message += `   Quantity: ${item.quantity}\n`;
+        message += `   Price: ${formatUGX(item.price)}\n`;
+        message += `   Subtotal: ${formatUGX(item.subtotal)}\n\n`;
     });
     
-    showNotification('Processing your order...');
+    message += '━━━━━━━━━━━━━━━━━━━━\n';
+    message += `*Total Items:* ${getTotalItems()}\n`;
+    message += `*Total Amount:* ${formatUGX(getCartTotal())}\n\n`;
+    message += 'Please confirm availability and payment details. Thank you! 🙏';
     
-    // Simulate checkout process
-    setTimeout(() => {
-        // Track successful purchase (simulated)
-        trackStandardEvent('Purchase', {
-            value: cartTotal,
-            currency: 'UGX',
-            num_items: cart.length
-        });
-        
-        trackCustomEvent('PurchaseComplete', {
-            transaction_value: cartTotal,
-            item_count: cart.length,
-            payment_method: 'demo'
-        });
-        
-        alert(`Thank you for your purchase!\n\nTotal: ${formatUGX(cartTotal)}\n\nThis is a demo checkout.`);
-        
-        // Clear cart
-        cart = [];
-        cartTotal = 0;
-        saveCart();
-        updateCartUI();
-        closeCart();
-    }, 1500);
+    // Encode message for URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Create WhatsApp URL
+    const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+    
+    // Track WhatsApp click
+    trackCustomEvent('WhatsAppCheckout', {
+        cart_total: getCartTotal(),
+        item_count: getTotalItems(),
+        unique_items: cart.length
+    });
+    
+    // Open WhatsApp
+    window.open(whatsappURL, '_blank');
+    
+    showNotification('Opening WhatsApp...');
 }
 
 // Save Cart to localStorage
 function saveCart() {
     localStorage.setItem('bbs_cart', JSON.stringify(cart));
-    localStorage.setItem('bbs_cartTotal', cartTotal);
 }
 
 // Load Cart from localStorage
 function loadCart() {
     const savedCart = localStorage.getItem('bbs_cart');
-    const savedTotal = localStorage.getItem('bbs_cartTotal');
     
     if (savedCart) {
         cart = JSON.parse(savedCart);
-    }
-    if (savedTotal) {
-        cartTotal = parseInt(savedTotal);
     }
     
     updateCartUI();
@@ -279,18 +353,15 @@ function handleContactSubmit(event) {
 
 // Notification System
 function showNotification(message) {
-    // Remove existing notifications
     const existing = document.querySelector('.notification');
     if (existing) existing.remove();
     
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = 'notification';
     notification.textContent = message;
     
     document.body.appendChild(notification);
     
-    // Remove after 3 seconds
     setTimeout(() => {
         notification.style.animation = 'slideInRight 0.3s ease reverse';
         setTimeout(() => notification.remove(), 300);
@@ -333,10 +404,10 @@ setInterval(() => {
     }
 }, 10000);
 
-// Track initial page view with custom parameters
+// Track initial page view
 trackCustomEvent('PageViewDetailed', {
-    page_type: window.location.pathname === '/' ? 'homepage' : 'internal',
+    page_type: window.location.pathname === '/' || window.location.pathname.includes('index') ? 'homepage' : 'internal',
     page_path: window.location.pathname,
     timestamp: new Date().toISOString()
 });
-                
+    
